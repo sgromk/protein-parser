@@ -1,0 +1,63 @@
+import json
+
+class ParserCriteria(object):
+    def __init__(self):
+        self.num_rules_index = 5
+        self.can_add_rule = 'normal'
+        self.saved_rules = {"numRules":0, "ruleList":[]}
+        self.rule_entry_widgets = []
+        self.cached_rules = None
+        self.accepted_abbrev = ['ALA', 'A', 'ARG', 'R', 'ASN', 'N', 'ASP', 'D', 'CYS', 'C', 'GLU', 'E', 'GLN', 'Q', 'GLY', 'G', 'HIS', 'H', 'ILE', 'I',
+                                'LEU', 'L', 'LYS', 'K', 'MET', 'M', 'PHE', 'F', 'PRO', 'P', 'SER', 'S', 'THR', 'T', 'TRP', 'W', 'TYR', 'Y', 'VAL', 'V']
+
+    def store_new_rule(self, new_rule_list):
+        entry_widget = {
+            "name": new_rule_list[0],
+            "grp1": new_rule_list[1],
+            "grp2": new_rule_list[2],
+            "distance": new_rule_list[3]
+        }
+        self.rule_entry_widgets.append(entry_widget)
+
+    def save_rules(self):
+        self.cache_rules()
+        with open('saved_rules.json', 'w') as saving_file:
+            json.dump(self.cached_rules, saving_file, indent=4)
+
+    def import_rules(self):
+        try:
+            with open('saved_rules.json', 'r') as import_file:
+                self.cached_rules = json.load(import_file)
+            self.num_rules_index = len(self.cached_rules)
+        except:
+            pass
+
+    def cache_rules(self):
+        self.cached_rules = []
+        for rule in self.rule_entry_widgets:
+            rule_to_cache = {}
+            parsable = 'yes'
+            rule_to_cache["name"] = rule["name"].get()
+            try:
+                rule_to_cache["distance"] = int(rule["distance"].get())
+            except:
+                rule_to_cache["distance"] = rule["distance"].get()
+                parsable = 'no'
+            for group in ["grp1", "grp2"]:
+                try:
+                    current_group = rule[group].get()
+                    split_rule = current_group.split(sep=",")
+                    stripped_rule = [protein.strip().upper() for protein in split_rule]
+                    rule_to_cache[group] = stripped_rule
+                    for abbrev in stripped_rule:
+                        if abbrev not in self.accepted_abbrev:
+                            parsable = 'no'
+                            break
+                except:
+                    rule_to_cache[group] = rule[group].get()
+                    parsable = 'no'
+            rule_to_cache['parsable'] = parsable
+            self.cached_rules.append(rule_to_cache)
+
+    def reset_entry_widgets(self):
+        self.rule_entry_widgets = []
