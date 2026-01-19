@@ -14,18 +14,6 @@ A desktop application for analyzing protein structures from PDB files to identif
 
 ## Installation
 
-Install system dependencies (Linux):
-```bash
-# Ubuntu/Debian
-sudo apt install python3-tk
-
-# Fedora/RHEL
-sudo dnf install python3-tkinter
-
-# Arch
-sudo pacman -S tk
-```
-
 Install Python dependencies:
 ```bash
 pip install biopython pandas xlsxwriter numpy
